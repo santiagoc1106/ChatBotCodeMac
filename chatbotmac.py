@@ -34,7 +34,7 @@ class ChatBot():
         #statbuf = os.stat("res.mp3")
         #mbytes = statbuf.st_size / 1024
         #duration = mbytes / 200
-        #os.system('start res.mp3')  #if you are using mac->afplay or else for windows->start
+        #os.system('afplay res.mp3')  #if you are using mac->afplay or else for windows->start
         #os.system("close res.mp3")
         #time.sleep(int(50*duration))
         #os.remove("res.mp3")
@@ -46,6 +46,7 @@ class ChatBot():
     @staticmethod
     def date_action():
         return datetime.date.today()
+    
     def evaluate_math_expression(self, expr):
         try:
             # Replace words with mathematical symbols
@@ -64,6 +65,7 @@ class ChatBot():
             return result
         except Exception as e:
             return f"Error: {str(e)}"
+
 # Running the AI
 if __name__ == "__main__":
     ai = ChatBot(name="jarvis")
@@ -76,6 +78,16 @@ if __name__ == "__main__":
         if ai.text == "hola Jarvis":
             spanish = True
             res = "Hola, soy JARVIS, su asistente personal. Como le puedo ayudar?"
+        elif any(i in ai.text for i in ["my name is", "i'm", "i am"]):
+            words = ai.text.split(" ")
+            ind = words.index('is')
+            name = words[ind + 1]
+            res = f"Hello {name}, I look forward in helping you."
+        elif any(i in ai.text for i in ["mi nombre es", "me llamo", "soy"]):
+            words = ai.text.split(" ")
+            ind = words.index('es', 'llamo', 'soy')
+            name = words[ind + 1]
+            res = f"Hola {name}, espero que te puedo ayudar."
         ## action time
         elif any (i in ai.text for i in ["tiempo", "hora"] ):
             spanish = True
@@ -123,6 +135,7 @@ if __name__ == "__main__":
                 res = f"El resultado es: {result}" if not isinstance(result, str) else result
             else:
                 res = "No entendi la expresion matematica."
+        
         elif ai.text == "ERROR":
             if spanish == False:
                 res= np.random.choice(["Sorry, come again?", "I couldn't understand you.", "Could you repeat that?", "I am having trouble understanding.", "My apologies, I cannot understand"])
