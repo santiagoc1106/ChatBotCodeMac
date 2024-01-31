@@ -1,7 +1,6 @@
 # for language model
 import speech_recognition as sr
 import os
-import time
 # for data
 import os
 import datetime
