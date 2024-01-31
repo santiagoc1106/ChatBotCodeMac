@@ -6,10 +6,10 @@ import os
 import datetime
 import numpy as np
 from gtts import gTTS
-import requests
 import re 
+from openai import OpenAI
 
-
+spanish = None
 # Building the AI
 class ChatBot():
     def __init__(self, name):
@@ -18,7 +18,12 @@ class ChatBot():
     def speech_to_text(self):
         recognizer = sr.Recognizer()
         with sr.Microphone() as mic:
-            print("Listening/Escuchando...")
+            if spanish == None:
+                print("Listening/Escuchando...")
+            if spanish == True:
+                print("Escuchando...")
+            if spanish == False:
+                print("Listening...")
             audio = recognizer.listen(mic)
             self.text="ERROR"
         try:
@@ -88,6 +93,17 @@ if __name__ == "__main__":
             ind = words.index('es', 'llamo', 'soy')
             name = words[ind + 1]
             res = f"Hola {name}, espero que te puedo ayudar."
+        #image
+        elif any(i in ai.text for i in ["generate", "image", "photo"]):
+            client =  OpenAI()
+            response = client.images.generate(
+                size = "1024x1024",
+                prompt = "a white siamese cat",
+                quality = "standard",
+                n = 1,
+            )
+            image_url = response.data[0].url
+            res = f"Here is a photo of a cat{image_url}"
         ## action time
         elif any (i in ai.text for i in ["tiempo", "hora"] ):
             spanish = True
@@ -102,7 +118,7 @@ if __name__ == "__main__":
             spanish = False
             res = ai.date_action()
         ## respond politely
-        elif any(i in ai.text for i in ["thank","thanks",]):
+        elif any(i in ai.text for i in ["thank","thanks","I appreciate"]):
             spanish = False
             res = np.random.choice(["You're welcome.","My pleasure.","Always happy to help.","I'm always here if you need me."])
         elif any(i in ai.text for i in ["gracias","aprecio"]):
@@ -116,7 +132,7 @@ if __name__ == "__main__":
             spanish = True
             res = np.random.choice(["Ten un buen dia.","Adios.","Hasta luego."])
             t = False
-        elif any(i in ai.text for i in ["Calculate", "calculate"]):
+        elif any(i in ai.text for i in ["Calculate", "calculate", "what is"]):
             # Extract the mathematical expression from the user's input
             expr_match = re.search(r'(\d+(\.\d+)?\s*[-+*/]\s*\d+(\.\d+)?)', ai.text)
             if expr_match:
@@ -143,4 +159,7 @@ if __name__ == "__main__":
                 res = np.random.choice(["Disculpe, no te puedo entender", "Me lo puede repetir por favor?", "No te puedo escuchar"])
        
         ai.text_to_speech(res)
-    print("Program shutting down...")
+    if spanish == False:
+        print("Program shutting down...")
+    if spanish ==True:
+        print("Apagando el programa...")
