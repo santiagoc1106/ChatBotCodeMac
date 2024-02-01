@@ -8,8 +8,16 @@ import numpy as np
 from gtts import gTTS
 import re 
 from openai import OpenAI
+import json
+import time 
+import python_weather
+import asyncio
+
+
 
 spanish = None
+name = None
+
 # Building the AI
 class ChatBot():
     def __init__(self, name):
@@ -51,7 +59,11 @@ class ChatBot():
     @staticmethod
     def date_action():
         return datetime.date.today()
-    
+    def timer_action():
+        seconds = time.time()
+        print("Time in seconds since the epoch:", seconds)
+        local_time = time.ctime(seconds)
+        print("Local time:", local_time)
     def evaluate_math_expression(self, expr):
         try:
             # Replace words with mathematical symbols
@@ -59,7 +71,7 @@ class ChatBot():
             expr = re.sub(r'(\bplus\b|\bmas\b)', '+', expr)
             expr = re.sub(r'(\bminus\b|\bmenos\b)', '-', expr)
             expr = re.sub(r'(\bmultiply\b|\btimes\b|\bpor\b)', '*', expr)
-            expr = re.sub(r'(\bdivide\b|\bdivididopor\b|\bsobre\b)', '/', expr)
+            expr = re.sub(r'(\bdivide\b|\bdividido por\b|\bsobre\b)', '/', expr)
 
             # Ensure proper spacing around operators
             expr = re.sub(r'(\d)([+\-*/])', r'\1 \2 ', expr)
@@ -72,10 +84,12 @@ class ChatBot():
             return f"Error: {str(e)}"
 
 # Running the AI
+
 if __name__ == "__main__":
     ai = ChatBot(name="jarvis")
     t = True
     while t:
+    
         ai.speech_to_text()
         if ai.wake_up(ai.text) is True:
             res = "Hello, I'm JARVIS, your personal assistant. How may I help you?"
@@ -83,27 +97,49 @@ if __name__ == "__main__":
         if ai.text == "hola Jarvis":
             spanish = True
             res = "Hola, soy JARVIS, su asistente personal. Como le puedo ayudar?"
-        elif any(i in ai.text for i in ["my name is", "i'm", "i am"]):
+        elif any(i in ai.text for i in ["my name is"]):
             words = ai.text.split(" ")
             ind = words.index('is')
             name = words[ind + 1]
             res = f"Hello {name}, I look forward in helping you."
-        elif any(i in ai.text for i in ["mi nombre es", "me llamo", "soy"]):
+        elif any(i in ai.text for i in ["Mi nombre es", "me llamo", "soy"]):
             words = ai.text.split(" ")
-            ind = words.index('es', 'llamo', 'soy')
+            ind = words.index('es')
             name = words[ind + 1]
             res = f"Hola {name}, espero que te puedo ayudar."
+        elif any (i in ai.text for i in ["what is my name"]):
+            res = f"Your name is {name}"
+        elif any (i in ai.text for i in ["es Mi nombre", "es mi nombre"]):
+            res = f"Tu nombre es {name}"
+        #weather
+        elif any( i in ai.text for i in ["temperature"]):
+            words = ai.text.split(" ")
+            ind = words.index("in")
+            loc = words[ind + 1]
+            async def getweather(loc):
+            # declare the client. the measuring unit used defaults to the metric system (celcius, km/h, etc.)
+                async with python_weather.Client(unit=python_weather.IMPERIAL) as client:
+                # fetch a weather forecast from a city
+                    weather = await client.get(loc)
+                    return weather.current.temperature
+            temp = asyncio.run(getweather(loc))
+            res = f'The temperature is {temp}º'
+            
         #image
-        elif any(i in ai.text for i in ["generate", "image", "photo"]):
-            client =  OpenAI()
-            response = client.images.generate(
-                size = "1024x1024",
-                prompt = "a white siamese cat",
-                quality = "standard",
-                n = 1,
-            )
-            image_url = response.data[0].url
-            res = f"Here is a photo of a cat{image_url}"
+        
+        #elif any(i in ai.text for i in ["generate", "image", "photo"]):
+            #client =  OpenAI(api_key = api_key)
+            #words = ai.text.split(" ")
+            #ind = words.index("of")
+            #req = words[ind + 1]
+            #response = client.images.generate(
+            #    size = "1024x1024",
+            #    prompt = f"{req}",
+            #    quality = "standard",
+            #    n = 1,
+            #)
+            #image_url = response.data[0].url
+            #res = f"Here is a photo of a {req}: {image_url}"
         ## action time
         elif any (i in ai.text for i in ["tiempo", "hora"] ):
             spanish = True
@@ -141,12 +177,20 @@ if __name__ == "__main__":
                 res = f"The result is: {result}" if not isinstance(result, str) else result
             else:
                 res = "Sorry, I couldn't understand the mathematical expression."
-        elif any(i in ai.text for i in ["computa"]):
+        elif any(i in ai.text for i in ["computa", "cula"]):
             spanish = True
             # Extract the mathematical expression from the user's input
             expr_match = re.search(r'(\d+(\.\d+)?\s*[-+*/]\s*\d+(\.\d+)?)', ai.text)
+            span_num = ("Uno", "Dos", "Tres", "Cuatro", "Cinco", "Seis", "Siete", "Ocho", "Nueve", "Diez")
+            span_to_num = {"Uno": 1, "Dos": 2, "Tres": 3, "Cuatro": 4, "Cinco":5, "Seis":6, "Siete":7, "Ocho":8, "Nueve":9, "Diez":10}
+            numbers = [span_to_num[word] for word in span_num]
+            span_add = [("mas")]
+            span_mult = [("por")]
+            span_sub = [("menos")]
+            span_div = [("dividido por")]
+
             if expr_match:
-                expr = expr_match.group()
+                expr = expr_match.group() in ai.text.lower
                 result = ai.evaluate_math_expression(expr)
                 res = f"El resultado es: {result}" if not isinstance(result, str) else result
             else:
