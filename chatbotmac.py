@@ -12,7 +12,7 @@ import json
 import time 
 import python_weather
 import asyncio
-
+import pickle
 
 
 spanish = None
@@ -42,15 +42,26 @@ class ChatBot():
     @staticmethod
     def text_to_speech(text):
         print("JARVIS--> ", text)
-        #speaker = gTTS(text=text, lang="en", slow=False)
-        #speaker.save("res.mp3")
-        #statbuf = os.stat("res.mp3")
-        #mbytes = statbuf.st_size / 1024
-        #duration = mbytes / 200
-        #os.system('afplay res.mp3')  #if you are using mac->afplay or else for windows->start
-        #os.system("close res.mp3")
-        #time.sleep(int(50*duration))
-        #os.remove("res.mp3")
+        if spanish == False:
+            speaker = gTTS(text=text, lang="en", slow=False)
+            speaker.save("res.mp3")
+            statbuf = os.stat("res.mp3")
+            mbytes = statbuf.st_size / 1024
+            duration = mbytes / 200
+            os.system('afplay res.mp3')  #if you are using mac->afplay or else for windows->start
+            #os.system("close res.mp3")
+            time.sleep(int(10*duration))
+            os.remove("res.mp3")
+        if spanish == True:
+            speaker = gTTS(text=text, lang="es", slow=False)
+            speaker.save("res.mp3")
+            statbuf = os.stat("res.mp3")
+            mbytes = statbuf.st_size / 1024
+            duration = mbytes / 200
+            os.system('afplay res.mp3')  #if you are using mac->afplay or else for windows->start
+            #os.system("close res.mp3")
+            time.sleep(int(10*duration))
+            os.remove("res.mp3")
     def wake_up(self, text):
         return True if self.name in text.lower() else False
     @staticmethod
@@ -89,7 +100,7 @@ if __name__ == "__main__":
     ai = ChatBot(name="jarvis")
     t = True
     while t:
-    
+        
         ai.speech_to_text()
         if ai.wake_up(ai.text) is True:
             res = "Hello, I'm JARVIS, your personal assistant. How may I help you?"
@@ -101,16 +112,33 @@ if __name__ == "__main__":
             words = ai.text.split(" ")
             ind = words.index('is')
             name = words[ind + 1]
-            res = f"Hello {name}, I look forward in helping you."
+            with open ('name.pickle', 'wb') as F:
+                pickle.dump(name, F)
+            with open('name.pickle', 'rb') as F:
+                loaded_name = pickle.load(F)
+            res = f"Hello {loaded_name}, I look forward in helping you."
         elif any(i in ai.text for i in ["Mi nombre es", "me llamo", "soy"]):
             words = ai.text.split(" ")
-            ind = words.index('es')
+            ind = words.index('is')
             name = words[ind + 1]
-            res = f"Hola {name}, espero que te puedo ayudar."
+            with open ('name.pickle', 'wb') as F:
+                pickle.dump(name, F)
+            with open('name.pickle', 'rb') as F:
+                loaded_name = pickle.load(F)
+            res = f"Hola {loaded_name}, espero que te pueda ayudar."
         elif any (i in ai.text for i in ["what is my name"]):
-            res = f"Your name is {name}"
+            with open('name.pickle', 'rb') as F:
+                loaded_name = pickle.load(F)
+            res = f"Your name is {loaded_name}"
         elif any (i in ai.text for i in ["es Mi nombre", "es mi nombre"]):
-            res = f"Tu nombre es {name}"
+            res = f"Tu nombre es {loaded_name}"
+        #repeat
+        elif any (i in ai.text for i in ["repeat", "say"]):
+            words = ai.text.split("this")
+            if len(words) == 2:
+                phrase = words[1].strip()
+            res = f"{phrase}"
+            
         #weather
         elif any( i in ai.text for i in ["temperature"]):
             words = ai.text.split(" ")
@@ -123,7 +151,7 @@ if __name__ == "__main__":
                     weather = await client.get(loc)
                     return weather.current.temperature
             temp = asyncio.run(getweather(loc))
-            res = f'The temperature is {temp}º'
+            res = f'The temperature is {temp} degrees'
             
         #image
         
@@ -168,7 +196,7 @@ if __name__ == "__main__":
             spanish = True
             res = np.random.choice(["Ten un buen dia.","Adios.","Hasta luego."])
             t = False
-        elif any(i in ai.text for i in ["Calculate", "calculate", "what is"]):
+        elif any(i in ai.text for i in ["Calculate", "calculate", "what is", "what's"]):
             # Extract the mathematical expression from the user's input
             expr_match = re.search(r'(\d+(\.\d+)?\s*[-+*/]\s*\d+(\.\d+)?)', ai.text)
             if expr_match:
