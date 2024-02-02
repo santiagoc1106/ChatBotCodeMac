@@ -23,6 +23,7 @@ class ChatBot():
     def __init__(self, name):
         print("...", name, "...")
         self.name = name
+
     def speech_to_text(self):
         recognizer = sr.Recognizer()
         with sr.Microphone() as mic:
@@ -39,6 +40,7 @@ class ChatBot():
             print("me --> ", self.text)
         except:
             print("me -->  ERROR")
+
     @staticmethod
     def text_to_speech(text):
         print("JARVIS--> ", text)
@@ -52,6 +54,7 @@ class ChatBot():
             #os.system("close res.mp3")
             time.sleep(int(10*duration))
             os.remove("res.mp3")
+
         if spanish == True:
             speaker = gTTS(text=text, lang="es", slow=False)
             speaker.save("res.mp3")
@@ -62,19 +65,24 @@ class ChatBot():
             #os.system("close res.mp3")
             time.sleep(int(10*duration))
             os.remove("res.mp3")
+
     def wake_up(self, text):
         return True if self.name in text.lower() else False
+    
     @staticmethod
     def action_time():
         return datetime.datetime.now().time().strftime('%I:%M %p')
+    
     @staticmethod
     def date_action():
         return datetime.date.today()
+    
     def timer_action():
         seconds = time.time()
-        print("Time in seconds since the epoch:", seconds)
+        print("Time:", seconds)
         local_time = time.ctime(seconds)
         print("Local time:", local_time)
+    
     def evaluate_math_expression(self, expr):
         try:
             # Replace words with mathematical symbols
@@ -105,9 +113,11 @@ if __name__ == "__main__":
         if ai.wake_up(ai.text) is True:
             res = "Hello, I'm JARVIS, your personal assistant. How may I help you?"
             spanish = False
+
         if ai.text == "hola Jarvis":
             spanish = True
             res = "Hola, soy JARVIS, su asistente personal. Como le puedo ayudar?"
+
         elif any(i in ai.text for i in ["my name is"]):
             words = ai.text.split(" ")
             ind = words.index('is')
@@ -117,6 +127,7 @@ if __name__ == "__main__":
             with open('name.pickle', 'rb') as F:
                 loaded_name = pickle.load(F)
             res = f"Hello {loaded_name}, I look forward in helping you."
+
         elif any(i in ai.text for i in ["Mi nombre es", "me llamo", "soy"]):
             words = ai.text.split(" ")
             ind = words.index('is')
@@ -126,10 +137,12 @@ if __name__ == "__main__":
             with open('name.pickle', 'rb') as F:
                 loaded_name = pickle.load(F)
             res = f"Hola {loaded_name}, espero que te pueda ayudar."
-        elif any (i in ai.text for i in ["what is my name"]):
+
+        elif any (i in ai.text for i in ["what is my name", "what's my name"]):
             with open('name.pickle', 'rb') as F:
                 loaded_name = pickle.load(F)
             res = f"Your name is {loaded_name}"
+
         elif any (i in ai.text for i in ["es Mi nombre", "es mi nombre"]):
             res = f"Tu nombre es {loaded_name}"
         #repeat
@@ -138,7 +151,20 @@ if __name__ == "__main__":
             if len(words) == 2:
                 phrase = words[1].strip()
             res = f"{phrase}"
-            
+        #where you live 
+        elif any(i in ai.text for i in ["I live" ]):
+            words = ai.text.split(" ")
+            ind = words.index('in')
+            city = words[ind + 1]
+            with open ('city.pickle', 'wb') as F:
+                pickle.dump(city, F)
+            with open('city.pickle', 'rb') as F:
+                loaded_city = pickle.load(F)
+            res = "Good to know."
+        elif any (i in ai.text for i in ["where am I from"]):
+            with open('city.pickle', 'rb') as F:
+                loaded_name = pickle.load(F)
+            res = f"You live in {loaded_city}"
         #weather
         elif any( i in ai.text for i in ["temperature"]):
             words = ai.text.split(" ")
