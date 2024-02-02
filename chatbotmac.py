@@ -7,7 +7,6 @@ import datetime
 import numpy as np
 from gtts import gTTS
 import re 
-from openai import OpenAI
 import json
 import time 
 import python_weather
@@ -20,6 +19,7 @@ name = None
 
 # Building the AI
 class ChatBot():
+
     def __init__(self, name):
         print("...", name, "...")
         self.name = name
@@ -127,7 +127,7 @@ if __name__ == "__main__":
             with open('name.pickle', 'rb') as F:
                 loaded_name = pickle.load(F)
             res = f"Hello {loaded_name}, I look forward in helping you."
-
+        #your name
         elif any(i in ai.text for i in ["Mi nombre es", "me llamo", "soy"]):
             words = ai.text.split(" ")
             ind = words.index('is')
@@ -163,7 +163,7 @@ if __name__ == "__main__":
             res = "Good to know."
         elif any (i in ai.text for i in ["where am I from"]):
             with open('city.pickle', 'rb') as F:
-                loaded_name = pickle.load(F)
+                loaded_city = pickle.load(F)
             res = f"You live in {loaded_city}"
         #weather
         elif any( i in ai.text for i in ["temperature"]):
@@ -197,10 +197,11 @@ if __name__ == "__main__":
         ## action time
         elif any (i in ai.text for i in ["tiempo", "hora"] ):
             spanish = True
-            res = ai.action_time()
+            res =  ai.action_time()
         elif any (i in ai.text for i in ["time"] ):
             spanish = False
             res = ai.action_time()
+        #date
         elif any( i in ai.text for i in ["fecha", "que dia es hoy"]):
             spanish = True
             res = ai.date_action()
@@ -222,6 +223,7 @@ if __name__ == "__main__":
             spanish = True
             res = np.random.choice(["Ten un buen dia.","Adios.","Hasta luego."])
             t = False
+        #do math
         elif any(i in ai.text for i in ["Calculate", "calculate", "what is", "what's"]):
             # Extract the mathematical expression from the user's input
             expr_match = re.search(r'(\d+(\.\d+)?\s*[-+*/]\s*\d+(\.\d+)?)', ai.text)
