@@ -1,7 +1,5 @@
-# for language model
 import speech_recognition as sr
 import os
-# for data
 import os
 import datetime
 import numpy as np
@@ -12,10 +10,35 @@ import time
 import python_weather
 import asyncio
 import pickle
-
+import selenium.webdriver as webdriver
+from selenium import webdriver
+from selenium.webdriver import Chrome
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+import scipy
+from scipy.fft import fft 
+import librosa as lb
+import os
+import pyaudio
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy
+import sklearn
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import TensorDataset, DataLoader
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVC 
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
 
 spanish = None
 name = None
+
+
 
 # Building the AI
 class ChatBot():
@@ -101,6 +124,7 @@ class ChatBot():
             return result
         except Exception as e:
             return f"Error: {str(e)}"
+    
 
 # Running the AI
 
@@ -108,7 +132,7 @@ if __name__ == "__main__":
     ai = ChatBot(name="jarvis")
     t = True
     while t:
-        
+    
         ai.speech_to_text()
         if ai.wake_up(ai.text) is True:
             res = "Hello, I'm JARVIS, your personal assistant. How may I help you?"
@@ -151,6 +175,33 @@ if __name__ == "__main__":
             if len(words) == 2:
                 phrase = words[1].strip()
             res = f"{phrase}"
+
+        elif any(i in ai.text for i in ["search", "look"]):
+            words = ai.text.split("up")
+            if len(words)==2:
+                search_term = words[1].strip()
+            def get_results(search_term):
+                url = "https://www.google.com"
+                chrome_options = Options()
+                chrome_options.add_experimental_option("detach", True)  
+                browser = Chrome(options = chrome_options)
+                browser.get(url)
+                search_box = browser.find_element(By.CLASS_NAME, "gLFyf")
+                search_box.send_keys(search_term)
+                search_box.submit()
+                try:
+                    links = browser.find_elements(By.XPATH, "//ol[@class='web_regular_results']//h3//a")
+                except:
+                    links = browser.find_elements(By.XPATH, "//h3//a")
+                results = []
+                for link in links:
+                    href = link.get_attribute("href")
+                    print(href)
+                    results.append(href)
+                return results
+            get_results(search_term)
+            res = f"Here is the result for {search_term}"
+            t = False
         #where you live 
         elif any(i in ai.text for i in ["I live" ]):
             words = ai.text.split(" ")
@@ -178,7 +229,45 @@ if __name__ == "__main__":
                     return weather.current.temperature
             temp = asyncio.run(getweather(loc))
             res = f'The temperature is {temp} degrees'
-            
+
+        elif any(i in ai.text for i in ["show my voice"]):
+            def show_voice():
+                audio_files= ['heyjarvis.mp3', 'name.mp3', 'repeat.mp3', 'time.mp3']
+
+                mfccs_list = []
+
+                for filename in audio_files:
+                    audio_data, sample_rate = lb.load(filename)
+
+                    mfccs = lb.feature.mfcc(y = audio_data, sr = sample_rate)
+
+                    mfccs_list.append(mfccs)
+
+                    # Plot waveform
+                    plt.figure(figsize=(10, 4))
+                    plt.subplot(2, len(audio_files), audio_files.index(filename) + 1)
+                    plt.plot(np.arange(len(audio_data))/sample_rate, audio_data)
+                    plt.title(f'Waveform - {filename}')
+                    plt.xlabel('Time (s)')
+                    plt.ylabel('Amplitude')
+                    
+                    # Visualize spectrogram
+                    plt.subplot(2, len(audio_files), len(audio_files) + audio_files.index(filename) + 1)
+                    stft_data = lb.stft(audio_data)
+                    magnitude_spec = np.abs(stft_data)  # Take the absolute value to retain only magnitude
+                    log_magnitude_spec = lb.amplitude_to_db(magnitude_spec, ref=np.max)
+                    lb.display.specshow(log_magnitude_spec, sr=sample_rate, x_axis='time', y_axis='hz')
+                    plt.colorbar(format='%+2.0f dB')
+                    plt.title(f'Spectrogram - {filename}')
+
+
+
+                # Define your audio files
+                audio_files = ['heyjarvis.mp3', 'name.mp3', 'repeat.mp3', 'time.mp3']
+                plt.tight_layout()
+                plt.show()
+            show_voice()
+
         #image
         
         #elif any(i in ai.text for i in ["generate", "image", "photo"]):
