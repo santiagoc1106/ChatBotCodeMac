@@ -23,4 +23,4 @@ def get_results(search_term):
         results.append(href)
     return results
 
-get_results("square root of pi")
+get_results("how old is the universe")
