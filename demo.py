@@ -16,6 +16,7 @@ def get_results(search_term):
         links = browser.find_elements(By.XPATH, "//ol[@class='web_regular_results']//h3//a")
     except:
         links = browser.find_elements(By.XPATH, "//h3//a")
+    
     results = []
     for link in links:
         href = link.get_attribute("href")
@@ -23,4 +24,4 @@ def get_results(search_term):
         results.append(href)
     return results
 
-get_results("how old is the universe")
+get_results("when was coca cola founded")

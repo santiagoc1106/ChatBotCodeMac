@@ -81,7 +81,7 @@ class ChatBot():
             statbuf = os.stat("res.mp3")
             mbytes = statbuf.st_size / 1024
             duration = mbytes / 200
-            os.system('afplay res.mp3')  #if you are using mac->afplay or else for windows->start
+            os.system('afplay res.mp3')
             #os.system("close res.mp3")
             time.sleep(int(7*duration))
             os.remove("res.mp3")
@@ -121,225 +121,67 @@ class ChatBot():
             return result
         except Exception as e:
             return f"Error: {str(e)}"
-    
+
 
 # Running the AI
 
 if __name__ == "__main__":
     ai = ChatBot(name="jarvis")
     t = True
+
     while t:
-    
-        try:
-            ai.speech_to_text()
-            if ai.wake_up(ai.text) is True:
-                res = "Hello, I'm JARVIS, your personal assistant. How may I help you?"
-                spanish = False
+        
+        ai.speech_to_text()
+        if ai.wake_up(ai.text) is True:
+            res = "Hello, I'm JARVIS, your personal assistant. How may I help you?"
+            spanish = False
 
-            if ai.text == "hola Jarvis":
-                spanish = True
-                res = "Hola, soy JARVIS, su asistente personal. Como le puedo ayudar?"
+        if ai.text == "hola Jarvis":
+            spanish = True
+            res = "Hola, soy JARVIS, su asistente personal. Como le puedo ayudar?"
 
-            elif any(i in ai.text for i in ["my name is"]):
-                spanish = False
-                words = ai.text.split(" ")
-                ind = words.index('is')
-                name = words[ind + 1]
-                with open ('name.pickle', 'wb') as F:
-                    pickle.dump(name, F)
-                with open('name.pickle', 'rb') as F:
-                    loaded_name = pickle.load(F)
-                res = f"Hello {loaded_name}, I look forward in helping you."
-            #your name
-            elif any(i in ai.text for i in ["Mi nombre es", "me llamo", "soy"]):
-                spansih = True
-                words = ai.text.split(" ")
-                ind = words.index('is')
-                name = words[ind + 1]
-                with open ('name.pickle', 'wb') as F:
-                    pickle.dump(name, F)
-                with open('name.pickle', 'rb') as F:
-                    loaded_name = pickle.load(F)
-                res = f"Hola {loaded_name}, espero que te pueda ayudar."
+        elif any(i in ai.text for i in ["my name is"]):
+            spanish = False
+            words = ai.text.split(" ")
+            ind = words.index('is')
+            name = words[ind + 1]
+            with open ('name.pickle', 'wb') as F:
+                pickle.dump(name, F)
+            with open('name.pickle', 'rb') as F:
+                loaded_name = pickle.load(F)
+            res = f"Hello {loaded_name}, I look forward in helping you."
+        #your name
+        elif any(i in ai.text for i in ["Mi nombre es", "me llamo", "soy"]):
+            spansih = True
+            words = ai.text.split(" ")
+            ind = words.index('is')
+            name = words[ind + 1]
+            with open ('name.pickle', 'wb') as F:
+                pickle.dump(name, F)
+            with open('name.pickle', 'rb') as F:
+                loaded_name = pickle.load(F)
+            res = f"Hola {loaded_name}, espero que te pueda ayudar."
 
-            elif any (i in ai.text for i in ["what is my name", "what's my name"]):
-                spanish = False
-                with open('name.pickle', 'rb') as F:
-                    loaded_name = pickle.load(F)
-                res = f"Your name is {loaded_name}"
+        elif any (i in ai.text for i in ["what is my name", "what's my name"]):
+            spanish = False
+            with open('name.pickle', 'rb') as F:
+                loaded_name = pickle.load(F)
+            res = f"Your name is {loaded_name}"
 
-            elif any (i in ai.text for i in ["es Mi nombre", "es mi nombre"]):
-                spanish = True
-                res = f"Tu nombre es {loaded_name}"
-            #repeat
-            elif any (i in ai.text for i in ["repeat", "say"]):
-                words = ai.text.split("this")
-                if len(words) == 2:
-                    phrase = words[1].strip()
-                res = f"{phrase}"
-        # Use the internet
-        #     elif any(i in ai.text for i in ["search", "look"]):
-        #         words = ai.text.split("up")
-        #         if len(words)==2:
-        #             search_term = words[1].strip()
-        #         def get_results(search_term):
-        #             url = "https://www.google.com"
-        #             chrome_options = Options()
-        #             chrome_options.add_experimental_option("detach", True)  
-        #             browser = Chrome(options = chrome_options)
-        #             browser.get(url)
-        #             search_box = browser.find_element(By.CLASS_NAME, "gLFyf")
-        #             search_box.send_keys(search_term)
-        #             search_box.submit()
-        #             try:
-        #                 links = browser.find_elements(By.XPATH, "//ol[@class='web_regular_results']//h3//a")
-        #             except:
-        #                 links = browser.find_elements(By.XPATH, "//h3//a")
-        #             results = []
-        #             for link in links:
-        #                 href = link.get_attribute("href")
-        #                 print(href)
-        #                 results.append(href)
-        #             return results
-        #         get_results(search_term)
-        #         res = "This is what I got"
-        #         t = False
-        #     where you live 
-            elif any(i in ai.text for i in ["I live" ]):
-                words = ai.text.split(" ")
-                ind = words.index('in')
-                city = words[ind + 1]
-                with open ('city.pickle', 'wb') as F:
-                    pickle.dump(city, F)
-                with open('city.pickle', 'rb') as F:
-                    loaded_city = pickle.load(F)
-                res = "Good to know."
-            elif any (i in ai.text for i in ["where am I from"]):
-                with open('city.pickle', 'rb') as F:
-                    loaded_city = pickle.load(F)
-                res = f"You live in {loaded_city}"
-            #weather
-            elif any( i in ai.text for i in ["temperature"]):
-                words = ai.text.split(" ")
-                ind = words.index("in")
-                loc = words[ind + 1]
-                async def getweather(loc):
-                # declare the client. the measuring unit used defaults to the metric system (celcius, km/h, etc.)
-                    async with python_weather.Client(unit=python_weather.IMPERIAL) as client:
-                    # fetch a weather forecast from a city
-                        weather = await client.get(loc)
-                        return weather.current.temperature
-                temp = asyncio.run(getweather(loc))
-                res = f'The temperature is {temp} degrees'
-        #Show spectrograms of saved audio files
-            elif any(i in ai.text for i in ["show my voice"]):
-                def show_voice():
-                    audio_files= ['heyjarvis.mp3', 'name.mp3', 'repeat.mp3', 'time.mp3']
-
-                    mfccs_list = []
-
-                    for filename in audio_files:
-                        audio_data, sample_rate = lb.load(filename)
-
-                        mfccs = lb.feature.mfcc(y = audio_data, sr = sample_rate)
-
-                        mfccs_list.append(mfccs)
-
-                        # Plot waveform
-                        plt.figure(figsize=(10, 4))
-                        plt.subplot(2, len(audio_files), audio_files.index(filename) + 1)
-                        plt.plot(np.arange(len(audio_data))/sample_rate, audio_data)
-                        plt.title(f'Waveform - {filename}')
-                        plt.xlabel('Time (s)')
-                        plt.ylabel('Amplitude')
-                        
-                        # Visualize spectrogram
-                        plt.subplot(2, len(audio_files), len(audio_files) + audio_files.index(filename) + 1)
-                        stft_data = lb.stft(audio_data)
-                        magnitude_spec = np.abs(stft_data)  # Take the absolute value to retain only magnitude
-                        log_magnitude_spec = lb.amplitude_to_db(magnitude_spec, ref=np.max)
-                        lb.display.specshow(log_magnitude_spec, sr=sample_rate, x_axis='time', y_axis='hz')
-                        plt.colorbar(format='%+2.0f dB')
-                        plt.title(f'Spectrogram - {filename}')
-
-
-
-                    # Define your audio files
-                    audio_files = ['heyjarvis.mp3', 'name.mp3', 'repeat.mp3', 'time.mp3']
-                    plt.tight_layout()
-                    plt.show()
-                show_voice()
-
-            #image
-            
-            #elif any(i in ai.text for i in ["generate", "image", "photo"]):
-                #client =  OpenAI(api_key = api_key)
-                #words = ai.text.split(" ")
-                #ind = words.index("of")
-                #req = words[ind + 1]
-                #response = client.images.generate(
-                #    size = "1024x1024",
-                #    prompt = f"{req}",
-                #    quality = "standard",
-                #    n = 1,
-                #)
-                #image_url = response.data[0].url
-                #res = f"Here is a photo of a {req}: {image_url}"
-            ## action time
-            elif any (i in ai.text for i in ["tiempo", "hora"] ):
-                spanish = True
-                res =  ai.action_time()
-            elif any (i in ai.text for i in ["time"] ):
-                spanish = False
-                res = ai.action_time()
-            #date
-            elif any( i in ai.text for i in ["fecha", "que dia es hoy"]):
-                spanish = True
-                res = ai.date_action()
-            elif any( i in ai.text for i in ["what is the date", "what day is it", "what's today"]):
-                spanish = False
-                res = ai.date_action()
-            ## respond politely
-            elif any(i in ai.text for i in ["thank","thanks","I appreciate"]):
-                spanish = False
-                res = np.random.choice(["You're welcome.","My pleasure.","Always happy to help.","I'm always here if you need me."])
-            elif any(i in ai.text for i in ["gracias","aprecio"]):
-                spanish = True
-                res = np.random.choice(["De nada.","Es mi placer.","Estoy aqui si me necesita."])
-            elif any(i in ai.text for i in ["bye","goodbye","shut down"]):
-                spanish = False
-                res = np.random.choice(["Have a good day.","Goodbye.","Come back if you need me"])
-                t= False
-            elif any(i in ai.text for i in ["adios","hasta luego","apagate"]):
-                spanish = True
-                res = np.random.choice(["Ten un buen dia.","Adios.","Hasta luego."])
-                t = False
-            #do math
-            elif any(i in ai.text for i in ["Calculate", "calculate", "what is", "what's"]):
-                # Extract the mathematical expression from the user's input
-                expr_match = re.search(r'(\d+(\.\d+)?\s*[-+*/]\s*\d+(\.\d+)?)', ai.text)
-                if expr_match:
-                    expr = expr_match.group()
-                    result = ai.evaluate_math_expression(expr)
-                    res = f"The result is: {result}" if not isinstance(result, str) else result
-                else:
-                    res = "Sorry, I couldn't understand the mathematical expression."
-            
-            elif ai.text == "ERROR":
-                if spanish == False:
-                    res= np.random.choice(["Sorry, come again?", "I couldn't understand you.", "Could you repeat that?", "I am having trouble understanding.", "My apologies, I cannot understand"])
-                if spanish == True:
-                    res = np.random.choice(["Disculpe, no te puedo entender", "Me lo puede repetir por favor?", "No te puedo escuchar"])
-    
-       
-            ai.text_to_speech(res)
-            if spanish == False:
-                print("Program shutting down...")
-            if spanish == True:
-                print("Apagando el programa...")
-                
-        except:
-            search_term = ai.text
+        elif any (i in ai.text for i in ["es Mi nombre", "es mi nombre"]):
+            spanish = True
+            res = f"Tu nombre es {loaded_name}"
+        #repeat phrase
+        elif any (i in ai.text for i in ["repeat", "say"]):
+            words = ai.text.split("this")
+            if len(words) == 2:
+                phrase = words[1].strip()
+            res = f"{phrase}"
+    # Use the internet
+        elif any(i in ai.text for i in ["search", "look"]):
+            words = ai.text.split("up")
+            if len(words)==2:
+                search_term = words[1].strip() 
             def get_results(search_term):
                 url = "https://www.google.com"
                 chrome_options = Options()
@@ -360,5 +202,136 @@ if __name__ == "__main__":
                     results.append(href)
                 return results
             get_results(search_term)
-            res = f"This is what I got for '{search_term}' "
+            res = "This is what I got"
+
+    #     where you live 
+        elif any(i in ai.text for i in ["I live" ]):
+            words = ai.text.split(" ")
+            ind = words.index('in')
+            city = words[ind + 1]
+            with open ('city.pickle', 'wb') as F:
+                pickle.dump(city, F)
+            with open('city.pickle', 'rb') as F:
+                loaded_city = pickle.load(F)
+            res = "Good to know."
+        elif any (i in ai.text for i in ["where am I from"]):
+            with open('city.pickle', 'rb') as F:
+                loaded_city = pickle.load(F)
+            res = f"You live in {loaded_city}"
+        #weather
+        elif any( i in ai.text for i in ["temperature"]):
+            words = ai.text.split(" ")
+            ind = words.index("in")
+            loc = words[ind + 1]
+            async def getweather(loc):
+            # declare the client. the measuring unit used defaults to the metric system (celcius, km/h, etc.)
+                async with python_weather.Client(unit=python_weather.IMPERIAL) as client:
+                # fetch a weather forecast from a city
+                    weather = await client.get(loc)
+                    return weather.current.temperature
+            temp = asyncio.run(getweather(loc))
+            res = f'The temperature is {temp} degrees'
+    #Show spectrograms of saved audio files
+        elif any(i in ai.text for i in ["show my voice"]):
+            def show_voice():
+                audio_files= ['heyjarvis.mp3', 'name.mp3', 'repeat.mp3', 'time.mp3']
+
+                mfccs_list = []
+
+                for filename in audio_files:
+                    audio_data, sample_rate = lb.load(filename)
+
+                    mfccs = lb.feature.mfcc(y = audio_data, sr = sample_rate)
+
+                    mfccs_list.append(mfccs)
+
+                    # Plot waveform
+                    plt.figure(figsize=(10, 4))
+                    plt.subplot(2, len(audio_files), audio_files.index(filename) + 1)
+                    plt.plot(np.arange(len(audio_data))/sample_rate, audio_data)
+                    plt.title(f'Waveform - {filename}')
+                    plt.xlabel('Time (s)')
+                    plt.ylabel('Amplitude')
+                    
+                    # Visualize spectrogram
+                    plt.subplot(2, len(audio_files), len(audio_files) + audio_files.index(filename) + 1)
+                    stft_data = lb.stft(audio_data)
+                    magnitude_spec = np.abs(stft_data)  # Take the absolute value to retain only magnitude
+                    log_magnitude_spec = lb.amplitude_to_db(magnitude_spec, ref=np.max)
+                    lb.display.specshow(log_magnitude_spec, sr=sample_rate, x_axis='time', y_axis='hz')
+                    plt.colorbar(format='%+2.0f dB')
+                    plt.title(f'Spectrogram - {filename}')
+
+                # Define your audio files
+                audio_files = ['heyjarvis.mp3', 'name.mp3', 'repeat.mp3', 'time.mp3']
+                plt.tight_layout()
+                plt.show()
+            show_voice()
+
+        #image
+        
+        #elif any(i in ai.text for i in ["generate", "image", "photo"]):
+            #client =  OpenAI(api_key = api_key)
+            #words = ai.text.split(" ")
+            #ind = words.index("of")
+            #req = words[ind + 1]
+            #response = client.images.generate(
+            #    size = "1024x1024",
+            #    prompt = f"{req}",
+            #    quality = "standard",
+            #    n = 1,
+            #)
+            #image_url = response.data[0].url
+            #res = f"Here is a photo of a {req}: {image_url}"
+
+        ##action time
+        elif any (i in ai.text for i in ["tiempo", "hora"] ):
+            spanish = True
+            res =  ai.action_time()
+        elif any (i in ai.text for i in ["time"] ):
+            spanish = False
+            res = ai.action_time()
+        #date
+        elif any( i in ai.text for i in ["fecha", "que dia es hoy"]):
+            spanish = True
+            res = ai.date_action()
+        elif any( i in ai.text for i in ["what is the date", "what day is it", "what's today"]):
+            spanish = False
+            res = ai.date_action()
+        ##respond politely
+        elif any(i in ai.text for i in ["thank","thanks","I appreciate"]):
+            spanish = False
+            res = np.random.choice(["You're welcome.","My pleasure.","Always happy to help.","I'm always here if you need me."])
+        elif any(i in ai.text for i in ["gracias","aprecio"]):
+            spanish = True
+            res = np.random.choice(["De nada.","Es mi placer.","Estoy aqui si me necesita."])
+        elif any(i in ai.text for i in ["bye","goodbye","shut down"]):
+            spanish = False
+            res = np.random.choice(["Have a good day.","Goodbye.","Come back if you need me"])
+            t= False
+        elif any(i in ai.text for i in ["adios","hasta luego","apagate"]):
+            spanish = True
+            res = np.random.choice(["Ten un buen dia.","Adios.","Hasta luego."])
             t = False
+        #do math
+        elif any(i in ai.text for i in ["Calculate", "calculate", "what is", "what's"]):
+            # Extract the mathematical expression from the user's input
+            expr_match = re.search(r'(\d+(\.\d+)?\s*[-+*/]\s*\d+(\.\d+)?)', ai.text)
+            if expr_match:
+                expr = expr_match.group()
+                result = ai.evaluate_math_expression(expr)
+                res = f"The result is: {result}" if not isinstance(result, str) else result
+            else:
+                res = "Sorry, I couldn't understand the mathematical expression."
+        
+        elif ai.text == "ERROR":
+            if spanish == False:
+                res= np.random.choice(["Sorry, come again?", "I couldn't understand you.", "Could you repeat that?", "I am having trouble understanding.", "My apologies, I cannot understand"])
+            if spanish == True:
+                res = np.random.choice(["Disculpe, no te puedo entender", "Me lo puede repetir por favor?", "No te puedo escuchar"])
+
+        ai.text_to_speech(res)
+    if spanish == False:
+        print("Program shutting down...")
+    if spanish == True:
+        print("Apagando el programa...")
