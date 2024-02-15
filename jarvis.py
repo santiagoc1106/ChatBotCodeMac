@@ -15,21 +15,14 @@ from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-import scipy
-from scipy.fft import fft 
 import librosa as lb
 import os
 import pyaudio
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy
 import sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import TensorDataset, DataLoader
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC 
 from sklearn.datasets import load_iris
