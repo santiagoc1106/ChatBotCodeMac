@@ -9,16 +9,16 @@ import scipy
 import sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import TensorDataset, DataLoader
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC 
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
+import librosa.display as ld
+
+
 
 def show_voice():
+
     audio_files= ['heyjarvis.mp3', 'name.mp3', 'repeat.mp3', 'time.mp3']
 
     mfccs_list = []
@@ -43,17 +43,16 @@ def show_voice():
         stft_data = lb.stft(audio_data)
         magnitude_spec = np.abs(stft_data)  # Take the absolute value to retain only magnitude
         log_magnitude_spec = lb.amplitude_to_db(magnitude_spec, ref=np.max)
-        lb.display.specshow(log_magnitude_spec, sr=sample_rate, x_axis='time', y_axis='hz')
+        ld.specshow(log_magnitude_spec, sr=sample_rate, x_axis='time', y_axis='hz')
         plt.colorbar(format='%+2.0f dB')
         plt.title(f'Spectrogram - {filename}')
-
-
 
     # Define your audio files
     audio_files = ['heyjarvis.mp3', 'name.mp3', 'repeat.mp3', 'time.mp3']
     plt.tight_layout()
     plt.show()
 
+show_voice()
 # Extract MFCC features
 # mfccs_list = []
 # for filename in audio_files:
