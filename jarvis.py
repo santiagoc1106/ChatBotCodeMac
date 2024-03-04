@@ -27,7 +27,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC 
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
-
+import platform
 spanish = None
 name = None
 
@@ -56,28 +56,54 @@ class ChatBot():
 
     @staticmethod
     def text_to_speech(text):
-        print("JARVIS--> ", text)
-        if spanish == False:
-            speaker = gTTS(text=text, lang="en", slow=False)
-            speaker.save("res.mp3")
-            statbuf = os.stat("res.mp3")
-            mbytes = statbuf.st_size / 1024
-            duration = mbytes / 200
-            os.system('start res.mp3')  #if you are using mac->afplay or else for windows->start
-            #os.system("close res.mp3")
-            time.sleep(int(7*duration))
-            os.remove("res.mp3")
+        if getattr(platform.uname(), "system") == "Windows":
+            print("JARVIS--> ", text)
+            if spanish == False:
+                speaker = gTTS(text=text, lang="en", slow=False)
+                speaker.save("res.mp3")
+                statbuf = os.stat("res.mp3")
+                mbytes = statbuf.st_size / 1024
+                duration = mbytes / 200
+                os.system('start res.mp3')  #if you are using mac->afplay or else for windows->start
+                #os.system("close res.mp3")
+                time.sleep(int(7*duration))
+                os.remove("res.mp3")
 
-        if spanish == True:
-            speaker = gTTS(text=text, lang="es", slow=False)
-            speaker.save("res.mp3")
-            statbuf = os.stat("res.mp3")
-            mbytes = statbuf.st_size / 1024
-            duration = mbytes / 200
-            os.system('afplay res.mp3')
-            #os.system("close res.mp3")
-            time.sleep(int(7*duration))
-            os.remove("res.mp3")
+            if spanish == True:
+                speaker = gTTS(text=text, lang="es", slow=False)
+                speaker.save("res.mp3")
+                statbuf = os.stat("res.mp3")
+                mbytes = statbuf.st_size / 1024
+                duration = mbytes / 200
+                os.system('start res.mp3')
+                #os.system("close res.mp3")
+                time.sleep(int(7*duration))
+                os.remove("res.mp3")
+
+        if getattr(platform.uname(), "system") == "macOS":
+            print("JARVIS--> ", text)
+            if spanish == False:
+                speaker = gTTS(text=text, lang="en", slow=False)
+                speaker.save("res.mp3")
+                statbuf = os.stat("res.mp3")
+                mbytes = statbuf.st_size / 1024
+                duration = mbytes / 200
+                os.system('afplay res.mp3')  #if you are using mac->afplay or else for windows->start
+                #os.system("close res.mp3")
+                time.sleep(int(7*duration))
+                os.remove("res.mp3")
+
+            if spanish == True:
+                speaker = gTTS(text=text, lang="es", slow=False)
+                speaker.save("res.mp3")
+                statbuf = os.stat("res.mp3")
+                mbytes = statbuf.st_size / 1024
+                duration = mbytes / 200
+                os.system('afplay res.mp3')
+                #os.system("close res.mp3")
+                time.sleep(int(7*duration))
+                os.remove("res.mp3")
+
 
     def wake_up(self, text):
         return True if self.name in text.lower() else False
@@ -88,7 +114,7 @@ class ChatBot():
     
     @staticmethod
     def date_action():
-        return datetime.date.today()
+        return str(datetime.date.today())
     
     def timer_action():
         seconds = time.time()

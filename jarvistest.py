@@ -72,7 +72,7 @@ class ChatBot():
             statbuf = os.stat("res.mp3")
             mbytes = statbuf.st_size / 1024
             duration = mbytes / 200
-            os.system('afplay res.mp3')  #if you are using mac->afplay or else for windows->start
+            os.system('start res.mp3')  #if you are using mac->afplay or else for windows->start
             #os.system("close res.mp3")
             time.sleep(int(7*duration))
             os.remove("res.mp3")
@@ -97,7 +97,7 @@ class ChatBot():
     
     @staticmethod
     def date_action():
-        return datetime.date.today()
+        return str(datetime.date.today())
     
     def timer_action():
         seconds = time.time()
